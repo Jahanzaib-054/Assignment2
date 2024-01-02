@@ -1,0 +1,64 @@
+﻿@page "/CategoryForm"
+@using APIAssignment.Shared;
+@inject HttpClient Http
+
+<h3>Category Form</h3>
+
+<EditForm Model="@cat" OnValidSubmit="@HandleOnSubmit">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+    <label>
+        Enter Category Name :
+        <InputText  @bind-Value="cat.CategoryName" />
+    </label>
+    <br>
+    <button type="submit">Submit</button>
+</EditForm>
+
+<p>@message</p>
+
+<table>
+    <thead>Id</thead>
+    <thead>Name</thead>
+ @foreach(Category ct  in categories )
+{
+    <tr>
+        <td>@ct.CategoryID</td>
+        <td>@ct.CategoryName</td>
+    </tr>
+}
+</table>
+
+@code {
+    Category cat = new Category();
+    List<Category> categories = new List<Category>();
+    string message = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        categories =  await Http.GetFromJsonAsync<List<Category>>("/pass");
+        //        var students = _dbcontext.Students. (x=>x.RollNumber).Skip(1).Take(1);
+
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        categories = await Http.GetFromJsonAsync<List<Category>>("/pass");
+
+    }
+
+    async void HandleOnSubmit()
+    {
+
+        var res = await Http.PostAsJsonAsync("/api/v1/Category", cat);
+        if(res.IsSuccessStatusCode)
+        {
+            message = res.ToString();
+        }
+        StateHasChanged();
+
+    }
+
+
+}
